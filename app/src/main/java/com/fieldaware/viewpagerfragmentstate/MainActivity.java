@@ -1,13 +1,12 @@
 package com.fieldaware.viewpagerfragmentstate;
 
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.ListFragment;
-import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,14 +43,13 @@ public class MainActivity extends FragmentActivity {
 
         if (getSupportFragmentManager().getFragments() != null){
             for (int i=0; i<getSupportFragmentManager().getFragments().size();i++) {
-                //mAdapter.addFragment(i);
+                mAdapter.addFragment(i);
             }
         } else {
-            mAdapter.list.add(ArrayListFragment.newInstance(panelSelected));
+            mAdapter.addFragment(0);
         }
         mAdapter.notifyDataSetChanged();
         mPager.setAdapter(mAdapter);
-
     }
 
     protected void onSaveInstanceState(Bundle outState)
@@ -65,13 +63,18 @@ public class MainActivity extends FragmentActivity {
     public void onListItemClick(ListView l, View v, int position, long id) {
 
         panelSelected++;
-       // mAdapter.addFragment(panelSelected);
-        mAdapter.list.add(ArrayListFragment.newInstance(panelSelected));
-        mPager.addView(n);
+        if (panelSelected==2 && twoPanel) {
+            mPager.setCurrentItem(panelSelected - 2);
+        }
+        mAdapter.addFragment(panelSelected);
         mAdapter.notifyDataSetChanged();
-        if ((panelSelected > 1 && twoPanel) || !twoPanel) {
+        if ((panelSelected > 2 && twoPanel) || !twoPanel || ((panelSelected == 1 && twoPanel))) {
             mPager.setCurrentItem(panelSelected, true);
         }
+        if (panelSelected==2 && twoPanel) {
+            mPager.setCurrentItem(panelSelected, true);
+        }
+
 
     }
 
@@ -79,27 +82,37 @@ public class MainActivity extends FragmentActivity {
     public void onBackPressed() {
         if(panelSelected>1) {
             mPager.setCurrentItem((twoPanel) ? panelSelected - 2 : panelSelected - 1, true);
-            //mAdapter.removeLastFragment();
-            mAdapter.list.remove(panelSelected);
-            mPager.removeViewAt(panelSelected);
+            //getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().getFragments().get(getSupportFragmentManager().getFragments().size()-1)).commit();
+            getSupportFragmentManager().getFragments().remove(panelSelected);
+            mAdapter.removeLastFragment();
+            //mPager.removeViewAt(panelSelected);
             mAdapter.notifyDataSetChanged();
-            //mPager.refreshDrawableState();
-
+            mPager.refreshDrawableState();
+            updatePager();
             panelSelected--;
         } else if (panelSelected>0) {
             //mPager.removeViewAt(1);
 
             mPager.setCurrentItem(0);
-            //mAdapter.removeLastFragment();
+            getSupportFragmentManager().getFragments().remove(1);
+            mAdapter.removeLastFragment();
             mAdapter.notifyDataSetChanged();
             mPager.refreshDrawableState();
             panelSelected--;
         } else {
             super.onBackPressed(); // This will pop the Activity from the stack.
         }
+
     }
 
-    /*public static class MyAdapter extends FragmentPagerAdapter {
+    public void updatePager() {
+
+        //mPager.setAdapter(null);
+        mPager.setAdapter(mAdapter);
+        mPager.setCurrentItem(panelSelected,true);
+    }
+
+    public static class MyAdapter extends FragmentPagerAdapter {
 
         boolean mTwoPane = false;
         private List<Fragment> mFragments = new ArrayList<Fragment>();
@@ -145,36 +158,6 @@ public class MainActivity extends FragmentActivity {
 
         public void removeLastFragment(){
             mFragments.remove(mFragments.size()-1);
-        }
-    }*/
-
-    public static class MyAdapter extends FragmentPagerAdapter {
-
-        ArrayList<ArrayListFragment> list = new ArrayList<ArrayListFragment>();
-        boolean mTwoPane;
-
-        public MyAdapter(FragmentManager fm, boolean twoPanel) {
-            super(fm);
-            mTwoPane = twoPanel;
-        }
-
-        @Override
-        public int getCount() {
-            return list.size();
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return ArrayListFragment.newInstance(position);
-        }
-
-        @Override
-        public float getPageWidth(int position) {
-            if (mTwoPane) {
-                return(0.5f);
-            } else {
-                return(1.0f);
-            }
         }
     }
 
