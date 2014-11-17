@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class LateralNavigationAdapter extends FragmentPagerAdapter {
 
-    boolean mTwoPane = false;
+    public boolean mTwoPane = false;
     public List<Fragment> mFragments = new ArrayList<Fragment>();
 
     public LateralNavigationAdapter(FragmentManager fm, boolean twoPane) {

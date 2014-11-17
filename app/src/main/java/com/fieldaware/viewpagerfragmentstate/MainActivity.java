@@ -26,12 +26,12 @@ public class MainActivity extends FragmentActivity {
         @Override
         public void onPageScrollStateChanged(int arg0) {
             if (arg0 == ViewPager.SCROLL_STATE_IDLE) {
-                if(getSupportFragmentManager().getFragments().size()<mAdapter.mFragments.size()) {
+                //if(getSupportFragmentManager().getFragments().size()<mAdapter.mFragments.size()) {
                     updatePager();
                     Log.d(TAG,"---------------------------");
                     Log.d(TAG,"Adjust fragments number");
                     Log.d(TAG,"---------------------------");
-                }
+                //}
 
             }
         }
@@ -75,6 +75,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) { // TODO Auto-generated method stub
         super.onConfigurationChanged(newConfig);
+        mAdapter.mTwoPane = !mAdapter.mTwoPane;
         updatePager();
     }
 
