@@ -2,31 +2,40 @@ package com.fieldaware.viewpagerfragmentstate;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.ListFragment;
-import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends FragmentActivity {
-    MyAdapter mAdapter;
+    LateralNavigationAdapter mAdapter;
     CustomViewPager mPager;
     int panelSelected = 0;
     boolean twoPanel = false;
     final static String TAG = "Puta mierda";
+    private ViewPager.OnPageChangeListener mListener = new ViewPager.OnPageChangeListener() {
 
+        @Override
+        public void onPageSelected(int arg0) {}
+
+        @Override
+        public void onPageScrolled(int arg0, float arg1, int arg2) {}
+
+        @Override
+        public void onPageScrollStateChanged(int arg0) {
+            if (arg0 == ViewPager.SCROLL_STATE_IDLE) {
+                if(getSupportFragmentManager().getFragments().size()<mAdapter.mFragments.size()) {
+                    updatePager();
+                    Log.d(TAG,"---------------------------");
+                    Log.d(TAG,"Adjust fragments number");
+                    Log.d(TAG,"---------------------------");
+                }
+
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +43,11 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.fragment_pager);
         mPager = (CustomViewPager)findViewById(R.id.pager);
         mPager.setEnabledSwipe(false);
-        twoPanel = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-        mAdapter = new MyAdapter(getSupportFragmentManager(), twoPanel);
+        //twoPanel = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+        float w = getResources().getDisplayMetrics().widthPixels;
+        float h = getResources().getDisplayMetrics().heightPixels;
+        twoPanel = (w > h) ? true : false;
+        mAdapter = new LateralNavigationAdapter(getSupportFragmentManager(), twoPanel);
 
         if (savedInstanceState != null) {
             panelSelected = savedInstanceState.getInt("panelSelected");
@@ -50,6 +62,7 @@ public class MainActivity extends FragmentActivity {
         }
         mAdapter.notifyDataSetChanged();
         mPager.setAdapter(mAdapter);
+        mPager.setOnPageChangeListener(mListener);
     }
 
     protected void onSaveInstanceState(Bundle outState)
@@ -57,42 +70,59 @@ public class MainActivity extends FragmentActivity {
         super.onSaveInstanceState(outState);
         System.out.println("TAG, onSavedInstanceState");
         outState.putInt("panelSelected", panelSelected);
-
     }
 
-    public void onListItemClick(ListView l, View v, int position, long id) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) { // TODO Auto-generated method stub
+        super.onConfigurationChanged(newConfig);
+        updatePager();
+    }
 
+
+
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        boolean exception = false;
         panelSelected++;
         if (panelSelected==2 && twoPanel) {
             mPager.setCurrentItem(panelSelected - 2);
         }
         mAdapter.addFragment(panelSelected);
         mAdapter.notifyDataSetChanged();
-        if ((panelSelected > 2 && twoPanel) || !twoPanel || ((panelSelected == 1 && twoPanel))) {
-            mPager.setCurrentItem(panelSelected, true);
+        try{
+            if ((panelSelected > 2 && twoPanel) || !twoPanel || ((panelSelected == 1 && twoPanel))) {
+                mPager.setCurrentItem(panelSelected, true);
+            }
+            if (panelSelected==2 && twoPanel) {
+                mPager.setCurrentItem(panelSelected, true);
+            }
+        } catch (Exception e) {
+            mAdapter.notifyDataSetChanged();
+            Log.d(TAG,"---------------------------");
+            Log.d(TAG,"It as been exception!!!!!!!");
+            Log.d(TAG,"---------------------------");
+            exception = true;
+        } finally {
+            if (exception){
+                if ((panelSelected > 2 && twoPanel) || !twoPanel || ((panelSelected == 1 && twoPanel))) {
+                    mPager.setCurrentItem(panelSelected, true);
+                }
+                if (panelSelected==2 && twoPanel) {
+                    mPager.setCurrentItem(panelSelected, true);
+                }
+            }
         }
-        if (panelSelected==2 && twoPanel) {
-            mPager.setCurrentItem(panelSelected, true);
-        }
-
-
     }
 
     @Override
     public void onBackPressed() {
         if(panelSelected>1) {
             mPager.setCurrentItem((twoPanel) ? panelSelected - 2 : panelSelected - 1, true);
-            //getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().getFragments().get(getSupportFragmentManager().getFragments().size()-1)).commit();
             getSupportFragmentManager().getFragments().remove(panelSelected);
             mAdapter.removeLastFragment();
-            //mPager.removeViewAt(panelSelected);
             mAdapter.notifyDataSetChanged();
             mPager.refreshDrawableState();
-            updatePager();
             panelSelected--;
         } else if (panelSelected>0) {
-            //mPager.removeViewAt(1);
-
             mPager.setCurrentItem(0);
             getSupportFragmentManager().getFragments().remove(1);
             mAdapter.removeLastFragment();
@@ -102,115 +132,12 @@ public class MainActivity extends FragmentActivity {
         } else {
             super.onBackPressed(); // This will pop the Activity from the stack.
         }
-
     }
 
     public void updatePager() {
-
-        //mPager.setAdapter(null);
+        mPager.setAdapter(null);
         mPager.setAdapter(mAdapter);
+        Log.d(TAG,"Panel selected in updatePager: "+panelSelected);
         mPager.setCurrentItem(panelSelected,true);
-    }
-
-    public static class MyAdapter extends FragmentPagerAdapter {
-
-        boolean mTwoPane = false;
-        private List<Fragment> mFragments = new ArrayList<Fragment>();
-
-        public MyAdapter(FragmentManager fm, boolean twoPane) {
-            super(fm);
-            this.mTwoPane = twoPane;
-        }
-
-        @Override
-        public int getItemPosition(Object object) {
-            Log.d("Mierdaca", "Number of fragments: "+getCount());
-            if ((getCount()==1 && mTwoPane) || (getCount()==0 && !mTwoPane)) {
-                return PagerAdapter.POSITION_NONE;
-            }
-            return PagerAdapter.POSITION_UNCHANGED;
-        }
-
-        @Override
-        public int getCount() {
-            return mFragments.size();
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-
-            return mFragments.get(position);
-        }
-
-        @Override
-        public float getPageWidth(int position) {
-            if (mTwoPane) {
-                return(0.5f);
-            } else {
-                return(1.0f);
-            }
-        }
-
-        public void addFragment(int position){
-            Fragment fr = ArrayListFragment.newInstance(position);
-            mFragments.add(fr);
-        }
-
-        public void removeLastFragment(){
-            mFragments.remove(mFragments.size()-1);
-        }
-    }
-
-    public static class ArrayListFragment extends ListFragment {
-        int mNum;
-
-        /**
-         * Create a new instance of CountingFragment, providing "num"
-         * as an argument.
-         */
-        static ArrayListFragment newInstance(int num) {
-            ArrayListFragment f = new ArrayListFragment();
-
-            // Supply num input as an argument.
-            Bundle args = new Bundle();
-            args.putInt("num", num);
-            f.setArguments(args);
-            return f;
-        }
-
-        /**
-         * When creating, retrieve this instance's number from its arguments.
-         */
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
-        }
-
-        /**
-         * The Fragment's UI is just a simple text view showing its
-         * instance number.
-         */
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_pager_list, container, false);
-            View tv = v.findViewById(R.id.text);
-            ((TextView)tv).setText("Fragment #" + mNum);
-            return v;
-        }
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-            setListAdapter(new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_list_item_1, Cheeses.asList()));
-        }
-
-        @Override
-        public void onListItemClick(ListView l, View v, int position, long id) {
-            Log.i("FragmentList", "Item clicked: " + id);
-            ((MainActivity)getActivity()).onListItemClick(l,v,position,id);
-
-        }
     }
 }
