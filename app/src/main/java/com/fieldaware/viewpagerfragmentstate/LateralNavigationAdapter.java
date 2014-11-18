@@ -54,6 +54,10 @@ public class LateralNavigationAdapter extends FragmentPagerAdapter {
         mFragments.add(fr);
     }
 
+    public void addFragment(Fragment fr) {
+        mFragments.add(fr);
+    }
+
     public void removeLastFragment(){
         mFragments.remove(mFragments.size()-1);
     }

@@ -1,6 +1,7 @@
 package com.fieldaware.viewpagerfragmentstate;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -58,10 +59,9 @@ public class ArrayListFragment extends ListFragment {
                 android.R.layout.simple_list_item_1, Cheeses.asList()));
     }
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Log.i("FragmentList", "Item clicked: " + id);
-        ((MainActivity)getActivity()).onListItemClick(l,v,position,id);
+    public void onListItemClick(Fragment fragment, int position) {
+        Log.i("FragmentList", "Item clicked: " + position);
+        ((MainActivity)getActivity()).onListItemClick(fragment,position);
 
     }
 }
