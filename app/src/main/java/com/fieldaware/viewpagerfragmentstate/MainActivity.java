@@ -171,41 +171,25 @@ public class MainActivity extends FragmentActivity {
             }
 
         } else {
-            if (fragment == leftFragment) {
-
-            } else {
-                boolean exception = false;
-                panelSelected++;
-                if (panelSelected==2 && twoPanel) {
-                    mPager.setCurrentItem(panelSelected - 2);
-                }
-                mAdapter.addFragment(rf);
+            boolean exception = false;
+            panelSelected++;
+            mAdapter.addFragment(rf);
+            mAdapter.notifyDataSetChanged();
+            try{
+                mPager.setCurrentItem(panelSelected, true);
+            } catch (Exception e) {
                 mAdapter.notifyDataSetChanged();
-                try{
-                    if ((panelSelected > 2 && twoPanel) || !twoPanel || ((panelSelected == 1 && twoPanel))) {
-                        mPager.setCurrentItem(panelSelected, true);
-                    }
-                    if (panelSelected==2 && twoPanel) {
-                        mPager.setCurrentItem(panelSelected, true);
-                    }
-                } catch (Exception e) {
-                    mAdapter.notifyDataSetChanged();
-                    Log.d(TAG,"---------------------------");
-                    Log.d(TAG,"It as been exception!!!!!!!");
-                    Log.d(TAG,"---------------------------");
-                    exception = true;
-                } finally {
-                    if (exception){
-                        if ((panelSelected > 2 && twoPanel) || !twoPanel || ((panelSelected == 1 && twoPanel))) {
-                            mPager.setCurrentItem(panelSelected, true);
-                        }
-                        if (panelSelected==2 && twoPanel) {
-                            mPager.setCurrentItem(panelSelected, true);
-                        }
-                    }
+                Log.d(TAG,"---------------------------");
+                Log.d(TAG,"It as been exception!!!!!!!");
+                Log.d(TAG,"---------------------------");
+                exception = true;
+            } finally {
+                if (exception){
+                   mPager.setCurrentItem(panelSelected, true);
                 }
             }
-
+            rightFragment = rf;
+            leftFragment = mAdapter.mFragments.get(mAdapter.mFragments.size()-2);
         }
 
         Log.d(TAG,"----------------------------------------------------------------------");
