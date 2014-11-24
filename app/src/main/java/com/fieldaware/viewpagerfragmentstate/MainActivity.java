@@ -1,14 +1,14 @@
 package com.fieldaware.viewpagerfragmentstate;
 
+import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
-import android.widget.ListView;
-
 import java.util.ArrayList;
 
 
@@ -24,7 +24,10 @@ public class MainActivity extends FragmentActivity {
     CustomViewPager mPager;
     int panelSelected = 0;
     boolean twoPanel = false;
-    final static String TAG = "Puta mierda";
+    boolean isEnoughBigToShowAlwaysTwoPanel = false;
+    boolean isTwoPanel = false;
+    String density;
+    final static String TAG = "FieldAware";
     private ViewPager.OnPageChangeListener mListener = new ViewPager.OnPageChangeListener() {
 
         @Override
@@ -53,10 +56,18 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.fragment_pager);
         mPager = (CustomViewPager)findViewById(R.id.pager);
         mPager.setEnabledSwipe(false);
-        //twoPanel = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
         float w = getResources().getDisplayMetrics().widthPixels;
         float h = getResources().getDisplayMetrics().heightPixels;
         twoPanel = (w > h) ? true : false;
+        isEnoughBigToShowAlwaysTwoPanel = isDeviceEnoughBigToShowAlwaysTwoPanel();
+        density = getDensityName(this);
+        if (!isTwoPanel()) {
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            twoPanel = false;
+        }
+        if (isEnoughBigToShowAlwaysTwoPanel) twoPanel = true;
+
         mAdapter = new LateralNavigationAdapter(getSupportFragmentManager(), twoPanel);
 
         if (savedInstanceState != null) {
@@ -87,8 +98,10 @@ public class MainActivity extends FragmentActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mAdapter.mTwoPane = !mAdapter.mTwoPane;
-        twoPanel = !twoPanel;
+        if (!isEnoughBigToShowAlwaysTwoPanel && isTwoPanel()) {
+            mAdapter.mTwoPane = !mAdapter.mTwoPane;
+            twoPanel = !twoPanel;
+        }
         updatePager();
     }
 
@@ -121,7 +134,6 @@ public class MainActivity extends FragmentActivity {
                         Log.d(TAG,"----------------------------");
                         Log.d(TAG,"It has been exception!!!!!!!");
                         Log.d(TAG,"----------------------------");
-                        exception = true;
                     } finally {
                         updatePager();
                         rightFragment = rf;
@@ -131,14 +143,12 @@ public class MainActivity extends FragmentActivity {
                     try{
                         mAdapter.addFragment(rf);
                         mAdapter.notifyDataSetChanged();
-                        //mPager.setCurrentItem(panelSelected, true);
 
                     } catch (Exception e) {
                         mAdapter.notifyDataSetChanged();
                         Log.d(TAG,"---------------------------");
                         Log.d(TAG,"It as been exception!!!!!!!");
                         Log.d(TAG,"---------------------------");
-                        exception = true;
                     } finally {
                         updatePager();
                         rightFragment = rf;
@@ -212,6 +222,11 @@ public class MainActivity extends FragmentActivity {
             mAdapter.notifyDataSetChanged();
             mPager.refreshDrawableState();
             panelSelected--;
+            Log.d(TAG,"----------------------------------------------------------------------");
+            Log.d(TAG,"------------------- REMOVE FRAGMENT-----------------------------------");
+            Log.d(TAG,"Number of fragments in mAdapter: " +mAdapter.mFragments.size());
+            Log.d(TAG,"Number of fragments in getSupportFragmentManager(): " +getSupportFragmentManager().getFragments().size());
+            Log.d(TAG,"----------------------------------------------------------------------");
         } else if (panelSelected>0) {
             mPager.setCurrentItem(0);
             if (twoPanel) {
@@ -223,16 +238,14 @@ public class MainActivity extends FragmentActivity {
             mAdapter.notifyDataSetChanged();
             mPager.refreshDrawableState();
             panelSelected--;
-
+            Log.d(TAG,"----------------------------------------------------------------------");
+            Log.d(TAG,"------------------- REMOVE FRAGMENT-----------------------------------");
+            Log.d(TAG,"Number of fragments in mAdapter: " +mAdapter.mFragments.size());
+            Log.d(TAG,"Number of fragments in getSupportFragmentManager(): " +getSupportFragmentManager().getFragments().size());
+            Log.d(TAG,"----------------------------------------------------------------------");
         } else {
             super.onBackPressed(); // This will pop the Activity from the stack.
         }
-
-        Log.d(TAG,"----------------------------------------------------------------------");
-        Log.d(TAG,"------------------- REMOVE FRAGMENT-----------------------------------");
-        Log.d(TAG,"Number of fragments in mAdapter: " +mAdapter.mFragments.size());
-        Log.d(TAG,"Number of fragments in getSupportFragmentManager(): " +getSupportFragmentManager().getFragments().size());
-        Log.d(TAG,"----------------------------------------------------------------------");
     }
 
     public void updatePager() {
@@ -241,4 +254,67 @@ public class MainActivity extends FragmentActivity {
         Log.d(TAG,"Panel selected in updatePager: "+panelSelected);
         mPager.setCurrentItem(panelSelected,true);
     }
+
+    private static String getDensityName(Context context) {
+        float density = context.getResources().getDisplayMetrics().density;
+        if (density >= 4.0) {
+            return "xxxhdpi";
+        }
+        if (density >= 3.0) {
+            return "xxhdpi";
+        }
+        if (density >= 2.0) {
+            return "xhdpi";
+        }
+        if (density >= 1.5) {
+            return "hdpi";
+        }
+        if (density >= 1.0) {
+            return "mdpi";
+        }
+        return "ldpi";
+    }
+
+    private double getDiagonalSize(){
+        DisplayMetrics metrics = this.getResources().getDisplayMetrics();
+        float widthDpi = metrics.xdpi;
+        Log.d(TAG,"widthDpi: "+ widthDpi);
+        float heightDpi = metrics.ydpi;
+        Log.d(TAG,"heightDpi: "+ heightDpi);
+        int widthPixels = metrics.widthPixels;
+        Log.d(TAG,"widthPixels: "+ widthPixels);
+        int heightPixels = metrics.heightPixels;
+        Log.d(TAG,"heightPixels: "+ heightPixels);
+        float widthInches = widthPixels / widthDpi;
+        Log.d(TAG,"widthInches: "+ widthInches);
+        float heightInches = heightPixels / heightDpi;
+        Log.d(TAG,"heightInches: "+ heightInches);
+
+        //a² + b² = c²
+        //The size of the diagonal in inches is equal to the square root of the height in inches squared plus the width in inches squared.
+        double diagonalInches = Math.sqrt( (widthInches * widthInches) + (heightInches * heightInches));
+        return diagonalInches;
+    }
+
+
+    private boolean isDeviceEnoughBigToShowAlwaysTwoPanel(){
+        double diagonalInches = getDiagonalSize();
+        Log.d(TAG,"Device diagonal inches: "+diagonalInches);
+        if (diagonalInches > 7) {
+            //Device is a 7" tablet bigger than 7"
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isTwoPanel(){
+        double diagonalInches = getDiagonalSize();
+        Log.d(TAG,"Device diagonal inches: "+diagonalInches);
+        if (diagonalInches > 6.5) {
+            //Device is a 7" tablet bigger than 7"
+            return true;
+        }
+        return false;
+    }
+
 }
