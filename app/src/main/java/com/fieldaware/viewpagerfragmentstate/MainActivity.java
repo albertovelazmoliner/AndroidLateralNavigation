@@ -248,7 +248,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    public void updatePager() {
+    private void updatePager() {
         mPager.setAdapter(null);
         mPager.setAdapter(mAdapter);
         Log.d(TAG,"Panel selected in updatePager: "+panelSelected);
