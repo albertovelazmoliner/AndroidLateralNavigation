@@ -3,10 +3,12 @@ package com.fieldaware.viewpagerfragmentstate;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 public class CustomViewPager extends ViewPager {
     private boolean mIsEnabledSwipe = true;
+    final static String TAG = "FieldAware";
 
     public CustomViewPager(Context context) {
         super(context);
@@ -34,6 +36,13 @@ public class CustomViewPager extends ViewPager {
 
     public void setEnabledSwipe(boolean enabled) {
         mIsEnabledSwipe = enabled;
+    }
+
+    public void updatePager(LateralNavigationAdapter adapter, int panelSelected) {
+        setAdapter(null);
+        setAdapter(adapter);
+        Log.d(TAG, "Panel selected in updatePager: " + panelSelected);
+        setCurrentItem(panelSelected,true);
     }
 
 }

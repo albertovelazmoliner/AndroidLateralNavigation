@@ -16,9 +16,23 @@ import android.support.v4.app.ListFragment;
 
 public class SimpleListFragment extends ListFragment {
     private static final String KEY_CONTENTS="contents";
+    private static final String[] items= { "lorem", "ipsum", "dolor",
+            "sit", "amet", "consectetuer", "adipiscing", "elit", "morbi",
+            "vel", "ligula", "vitae", "arcu", "aliquet", "mollis", "etiam",
+            "vel", "erat", "placerat", "ante", "porttitor", "sodales",
+            "pellentesque", "augue", "purus" };
 
-    public static SimpleListFragment newInstance(String[] contents) {
-        return(newInstance(new ArrayList<String>(Arrays.asList(contents))));
+    public static SimpleListFragment newInstance() {
+        return(newInstance(new ArrayList<String>(Arrays.asList(items))));
+    }
+
+    public static SimpleListFragment newInstance(int selectedItem) {
+        ArrayList<String> middleContents=new ArrayList<String>();
+
+        for (int i=0; i < 20; i++) {
+            middleContents.add(items[selectedItem] + " #" + i);
+        }
+        return (newInstance(middleContents));
     }
 
     public static SimpleListFragment newInstance(ArrayList<String> contents) {
