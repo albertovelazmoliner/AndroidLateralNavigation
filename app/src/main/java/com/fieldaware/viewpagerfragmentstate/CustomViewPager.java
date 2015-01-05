@@ -44,5 +44,4 @@ public class CustomViewPager extends ViewPager {
         Log.d(TAG, "Panel selected in updatePager: " + panelSelected);
         setCurrentItem(panelSelected,true);
     }
-
 }

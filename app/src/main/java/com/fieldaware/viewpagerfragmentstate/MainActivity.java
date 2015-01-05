@@ -85,7 +85,7 @@ public class MainActivity extends FragmentActivity {
     public void onListItemClick(Fragment currentFragment, int position) {
         if (touchable) {
             SimpleListFragment rf = SimpleListFragment.newInstance(position);
-            if (panelSelected>1 && currentFragment != leftFragment) touchable = false;
+            if (panelSelected > 1 && currentFragment != leftFragment) touchable = false;
             loadNewFragment(currentFragment, rf);
         }
     }
@@ -128,8 +128,8 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public void onBackPressed() {
-        if (panelSelected>0) {
-            if(panelSelected>1) {
+        if (panelSelected > 0) {
+            if(panelSelected > 1) {
                 mPager.setCurrentItem((twoPanel) ? panelSelected - 2 : panelSelected - 1, true);
             } else {
                 mPager.setCurrentItem(0);
@@ -142,7 +142,7 @@ public class MainActivity extends FragmentActivity {
 
     private void updatingActivityRemovingFragment() {
         getSupportFragmentManager().getFragments().remove(panelSelected);
-        if (panelSelected >1 && twoPanel){
+        if (panelSelected > 1 && twoPanel){
             leftFragment = mAdapter.mFragments.get(panelSelected-2);
             rightFragment = mAdapter.mFragments.get(panelSelected-1);
         } else if (panelSelected ==  1) {
