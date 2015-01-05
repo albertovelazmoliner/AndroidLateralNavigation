@@ -183,7 +183,8 @@ public class MainActivity extends FragmentActivity {
         int heightPixels = metrics.heightPixels;
         float widthInches = widthPixels / widthDpi;
         float heightInches = heightPixels / heightDpi;
-        //The size of the diagonal in inches is equal to the square root of the height in inches squared plus the width in inches squared.
+        //The size of the diagonal in inches is equal to the square root of the height in inches
+        // squared plus the width in inches squared.
         return Math.sqrt( (widthInches * widthInches) + (heightInches * heightInches));
     }
 }
