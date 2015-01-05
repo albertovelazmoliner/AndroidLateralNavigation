@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by user on 17/11/14.
+ * Created by Alberto Velaz on 17/11/14.
  */
 public class LateralNavigationAdapter extends FragmentPagerAdapter {
 
