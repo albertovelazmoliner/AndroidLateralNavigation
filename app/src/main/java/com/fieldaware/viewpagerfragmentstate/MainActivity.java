@@ -20,6 +20,7 @@ public class MainActivity extends FragmentActivity {
     boolean isTwoPanelInLandscape = false;
     boolean isEnoughBigToShowAlwaysTwoPanel = false;
     boolean touchable = true;
+
     private ViewPager.OnPageChangeListener mListener = new ViewPager.OnPageChangeListener() {
 
         @Override
@@ -45,14 +46,6 @@ public class MainActivity extends FragmentActivity {
         mPager = (CustomViewPager)findViewById(R.id.pager);
         mPager.setEnabledSwipe(false);
         setScreenSettings();
-
-        if (!isTwoPanelInLandscape) {
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-            twoPanel = false;
-        } else if (isEnoughBigToShowAlwaysTwoPanel) {
-            twoPanel = true;
-        }
 
         mAdapter = new LateralNavigationAdapter(getSupportFragmentManager(), twoPanel);
 
@@ -94,7 +87,6 @@ public class MainActivity extends FragmentActivity {
             SimpleListFragment rf = SimpleListFragment.newInstance(position);
             if (panelSelected>1 && currentFragment != leftFragment) touchable = false;
             loadNewFragment(currentFragment, rf);
-
         }
     }
 
@@ -104,30 +96,29 @@ public class MainActivity extends FragmentActivity {
                 if (rightFragment != null) {
                     getSupportFragmentManager().getFragments().remove(panelSelected);
                     mAdapter.removeLastFragment(); //remove current right panel
-                    mAdapter.addFragment(newFragment);
-                    mAdapter.notifyDataSetChanged();
-                    mPager.setCurrentItem(panelSelected, true);
-                    mPager.updatePager(mAdapter, panelSelected);
+                    updatingActivityAfterAddingFragmentNoAnimation(newFragment);
                 } else {
                     panelSelected++;
-                    mAdapter.addFragment(newFragment);
-                    mAdapter.notifyDataSetChanged();
-                    mPager.updatePager(mAdapter, panelSelected);
+                    updatingActivityAfterAddingFragmentNoAnimation(newFragment);
                 }
-                rightFragment = newFragment;
             } else {
-                updatingPagerAfterAddingFragmentWithAnimation(newFragment);
+                updatingActivityAfterAddingFragmentWithAnimation(newFragment);
             }
         } else {
-            updatingPagerAfterAddingFragmentWithAnimation(newFragment);
+            updatingActivityAfterAddingFragmentWithAnimation(newFragment);
         }
     }
 
-    private void updatingPagerAfterAddingFragmentWithAnimation(Fragment newFragment) {
+    private void updatingActivityAfterAddingFragmentNoAnimation(Fragment newFragment) {
+        mAdapter.addFragment(newFragment);
+        mAdapter.notifyDataSetChanged();
+        mPager.updatePager(mAdapter, panelSelected);
+        rightFragment = newFragment;
+    }
+
+    private void updatingActivityAfterAddingFragmentWithAnimation(Fragment newFragment) {
         panelSelected++;
-        if (panelSelected==2 && twoPanel) {
-            mPager.setCurrentItem(panelSelected - 2);
-        }
+        if (panelSelected==2 && twoPanel) mPager.setCurrentItem(panelSelected - 2);
         mAdapter.addFragment(newFragment);
         mAdapter.notifyDataSetChanged();
         mPager.setCurrentItem(panelSelected, true);
@@ -143,13 +134,13 @@ public class MainActivity extends FragmentActivity {
             } else {
                 mPager.setCurrentItem(0);
             }
-            updatingPagerRemovingFragment();
+            updatingActivityRemovingFragment();
         } else {
             super.onBackPressed();
         }
     }
 
-    private void updatingPagerRemovingFragment() {
+    private void updatingActivityRemovingFragment() {
         getSupportFragmentManager().getFragments().remove(panelSelected);
         if (panelSelected >1 && twoPanel){
             leftFragment = mAdapter.mFragments.get(panelSelected-2);
@@ -175,6 +166,13 @@ public class MainActivity extends FragmentActivity {
         double diagonalSize = getDiagonalSize();
         isEnoughBigToShowAlwaysTwoPanel = (diagonalSize > 7);
         isTwoPanelInLandscape = (diagonalSize > 6.5);
+        if (!isTwoPanelInLandscape) {
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            twoPanel = false;
+        } else if (isEnoughBigToShowAlwaysTwoPanel) {
+            twoPanel = true;
+        }
     }
 
     private double getDiagonalSize(){
