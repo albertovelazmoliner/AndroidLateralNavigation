@@ -5,8 +5,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Alberto Velaz on 17/11/14.
@@ -14,7 +14,7 @@ import java.util.List;
 public class LateralNavigationAdapter extends FragmentPagerAdapter {
 
     public boolean mTwoPane = false;
-    public List<Fragment> mFragments = new ArrayList<Fragment>();
+    private ArrayList<WeakReference<Fragment>> mFragments = new ArrayList<WeakReference<Fragment>>();
 
     public LateralNavigationAdapter(FragmentManager fm, boolean twoPane) {
         super(fm);
@@ -36,8 +36,8 @@ public class LateralNavigationAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-
-        return mFragments.get(position);
+        WeakReference<Fragment> weakReference = mFragments.get(position);
+        return weakReference.get();
     }
 
     @Override
@@ -49,16 +49,23 @@ public class LateralNavigationAdapter extends FragmentPagerAdapter {
         }
     }
 
-    public void addFragment(int position){
+    /*public void addFragment(int position){
         Fragment fr = ArrayListFragment.newInstance(position);
         mFragments.add(fr);
-    }
+    }*/
 
     public void addFragment(Fragment fr) {
-        mFragments.add(fr);
+        mFragments.add(new WeakReference<Fragment>(fr));
+        notifyDataSetChanged();
+
     }
 
     public void removeLastFragment(){
         mFragments.remove(mFragments.size()-1);
+    }
+
+    public void remove(int position){
+        mFragments.remove(position);
+        notifyDataSetChanged();
     }
 }

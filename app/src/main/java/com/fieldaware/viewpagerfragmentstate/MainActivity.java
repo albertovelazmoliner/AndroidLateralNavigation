@@ -1,9 +1,7 @@
 package com.fieldaware.viewpagerfragmentstate;
 
-import android.annotation.TargetApi;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -38,7 +36,6 @@ public class MainActivity extends FragmentActivity {
         }
     };
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,14 +50,10 @@ public class MainActivity extends FragmentActivity {
             panelSelected = savedInstanceState.getInt("panelSelected");
         }
 
-        if (getSupportFragmentManager().getFragments() != null){
-            for (int i=0; i<getSupportFragmentManager().getFragments().size();i++) {
-                mAdapter.addFragment(i);
-            }
-        } else {
-            mAdapter.addFragment(SimpleListFragment.newInstance());
-            leftFragment = mAdapter.mFragments.get(0);
-        }
+
+        mAdapter.addFragment(SimpleListFragment.newInstance());
+        leftFragment = mAdapter.getItem(0);
+
         mAdapter.notifyDataSetChanged();
         mPager.setAdapter(mAdapter);
         mPager.setOnPageChangeListener(mListener);
@@ -123,7 +116,7 @@ public class MainActivity extends FragmentActivity {
         mAdapter.notifyDataSetChanged();
         mPager.setCurrentItem(panelSelected, true);
         rightFragment = newFragment;
-        leftFragment = mAdapter.mFragments.get(mAdapter.mFragments.size()-2);
+        leftFragment = mAdapter.getItem(mAdapter.getCount()-2);
     }
 
     @Override
@@ -143,10 +136,10 @@ public class MainActivity extends FragmentActivity {
     private void updatingActivityRemovingFragment() {
         getSupportFragmentManager().getFragments().remove(panelSelected);
         if (panelSelected > 1 && twoPanel){
-            leftFragment = mAdapter.mFragments.get(panelSelected-2);
-            rightFragment = mAdapter.mFragments.get(panelSelected-1);
+            leftFragment = mAdapter.getItem(panelSelected-2);
+            rightFragment = mAdapter.getItem(panelSelected-1);
         } else if (panelSelected ==  1) {
-            leftFragment = mAdapter.mFragments.get(0);
+            leftFragment = mAdapter.getItem(0);
             rightFragment = null;
         }
         mAdapter.removeLastFragment();
