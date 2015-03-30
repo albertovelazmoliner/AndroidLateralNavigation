@@ -15,6 +15,8 @@ public class LateralNavigationAdapter extends FragmentPagerAdapter {
 
     public boolean mTwoPane = false;
     private ArrayList<WeakReference<Fragment>> mFragments = new ArrayList<WeakReference<Fragment>>();
+    private static float littlePane = 0.34f;
+    private static float bigPane = 0.66f;
 
     public LateralNavigationAdapter(FragmentManager fm, boolean twoPane) {
         super(fm);
@@ -43,7 +45,17 @@ public class LateralNavigationAdapter extends FragmentPagerAdapter {
     @Override
     public float getPageWidth(int position) {
         if (mTwoPane) {
-            return(0.5f);
+            if (getCount() == 1) {
+                return(1.0f);
+            } else {
+                if (getCount() % 2 == 0) {
+                    // number is even
+                    return (position % 2 == 0) ? littlePane : bigPane;
+                } else {
+                    // number is odd
+                    return (position % 2 == 0) ? bigPane : littlePane;
+                }
+            }
         } else {
             return(1.0f);
         }
